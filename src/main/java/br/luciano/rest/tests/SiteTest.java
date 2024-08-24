@@ -1,16 +1,35 @@
 package br.luciano.rest.tests;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import br.luciano.rest.core.BaseTest;
 
 
 public class SiteTest extends BaseTest{
+	private String token;
+	
+	@Before
+	public void login() {
+		Map<String, String> login = new HashMap<>();
+		login.put("email", "luciano@email.com");
+		login.put("senha", "123456");
+		
+		token = given()
+			.body(login)
+		.when()
+			.post("/signin")
+		.then()
+			.statusCode(200)
+			.extract().path("token")
+		;
+	}
 
 	@Test
 	public void naoDeveAcessarSemToken() {
@@ -24,19 +43,6 @@ public class SiteTest extends BaseTest{
 	
 	@Test
 	public void deveIncluriContaComSucesso() {
-		Map<String, String> login = new HashMap<>();
-		login.put("email", "luciano@email.com");
-		login.put("senha", "123456");
-		
-		String token = given()
-			.body(login)
-		.when()
-			.post("/signin")
-		.then()
-			.statusCode(200)
-			.extract().path("token")
-		;
-		
 		given()
 			.header("Authorization", "JWT " + token)
 			.body("{ \"nome\": \"conta nova\" }")
@@ -44,6 +50,21 @@ public class SiteTest extends BaseTest{
 			.post("/contas")
 		.then()
 			.statusCode(201)
+		;
+		
+	}
+	
+	@Test
+	public void deveAlterarContaComSucesso() {
+		given()
+			.header("Authorization", "JWT " + token)
+			.body("{ \"nome\": \"conta alterada\" }")
+		.when()
+			.put("/contas/2237412")
+		.then()
+			.statusCode(200)
+			.log().all()
+			.body("nome", is("conta alterada"))
 		;
 		
 	}
