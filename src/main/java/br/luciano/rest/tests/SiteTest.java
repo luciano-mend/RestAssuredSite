@@ -63,8 +63,21 @@ public class SiteTest extends BaseTest{
 			.put("/contas/2237412")
 		.then()
 			.statusCode(200)
-			.log().all()
 			.body("nome", is("conta alterada"))
+		;
+		
+	}
+	
+	@Test
+	public void naoDeveInserirContaComMesmoNome() {
+		given()
+			.header("Authorization", "JWT " + token)
+			.body("{ \"nome\": \"conta alterada\" }")
+		.when()
+			.post("/contas")
+		.then()
+			.statusCode(400)
+			.body("error", is("Já existe uma conta com esse nome!"))
 		;
 		
 	}
