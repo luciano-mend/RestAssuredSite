@@ -178,4 +178,15 @@ public class SiteTest extends BaseTest{
 			.body("find{it.conta_id == 2237412}.saldo", is("100.00"))
 		;
 	}
+	
+	@Test
+	public void deveRemoverMovimentacao() {
+		given()
+			.header("Authorization", "JWT " + token)
+		.when()
+			.delete("/transacoes/2100889")
+		.then()
+			.statusCode(204)
+		;
+	}
 }
