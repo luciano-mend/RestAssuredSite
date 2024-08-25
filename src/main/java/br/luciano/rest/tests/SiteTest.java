@@ -1,7 +1,7 @@
 package br.luciano.rest.tests;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -87,7 +87,6 @@ public class SiteTest extends BaseTest{
 	public void deveInserirMovimentacaoComSucesso() {
 		Movimentacao movimentacao = new Movimentacao();
 		movimentacao.setConta_id(2237412);
-//		movimentacao.setUsuarioa_id(123);
 		movimentacao.setDescricao("Descricao da movimentacao");
 		movimentacao.setEnvolvido("Envolvido da movimentacao");
 		movimentacao.setTipo("REC");
@@ -106,6 +105,27 @@ public class SiteTest extends BaseTest{
 			.body("descricao", is("Descricao da movimentacao"))
 			.body("status", is(true))
 		;
+	}
+	
+	@Test
+	public void deveValidarCamposMovimentacao() {
 		
+		given()
+			.header("Authorization", "JWT " + token)
+			.body("{}")
+		.when()
+			.post("/transacoes")
+		.then()
+			.statusCode(400)
+			.body("$", hasSize(8))
+			.body("msg", hasItems("Data da Movimentação é obrigatório",
+					"Data do pagamento é obrigatório",
+					"Descrição é obrigatório",
+					"Interessado é obrigatório",
+					"Valor é obrigatório",
+					"Valor deve ser um número",
+					"Conta é obrigatório",
+					"Situação é obrigatório"))
+		;
 	}
 }
