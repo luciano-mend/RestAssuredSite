@@ -152,4 +152,16 @@ public class SiteTest extends BaseTest{
 		movimentacao.setStatus(true);
 		return movimentacao;
 	}
+	
+	@Test
+	public void naoDeveRemoverContaComMovimentacao() {
+		given()
+			.header("Authorization", "JWT " + token)
+		.when()
+			.delete("/contas/2237412")
+		.then()
+			.statusCode(500)
+			.body("constraint", is("transacoes_conta_id_foreign"))
+		;
+	}
 }
