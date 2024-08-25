@@ -85,15 +85,7 @@ public class SiteTest extends BaseTest{
 	
 	@Test
 	public void deveInserirMovimentacaoComSucesso() {
-		Movimentacao movimentacao = new Movimentacao();
-		movimentacao.setConta_id(2237412);
-		movimentacao.setDescricao("Descricao da movimentacao");
-		movimentacao.setEnvolvido("Envolvido da movimentacao");
-		movimentacao.setTipo("REC");
-		movimentacao.setData_transacao("01/08/2024");
-		movimentacao.setData_pagamento("10/08/2024");
-		movimentacao.setValor(100f);
-		movimentacao.setStatus(true);		
+		Movimentacao movimentacao = getMovimentacaoValida();		
 		
 		given()
 			.header("Authorization", "JWT " + token)
@@ -127,5 +119,37 @@ public class SiteTest extends BaseTest{
 					"Conta é obrigatório",
 					"Situação é obrigatório"))
 		;
+	}
+	
+	@Test
+	public void naoDeveCadastrarMovimentacaoFutura() {
+		Movimentacao movimentacao = getMovimentacaoValida();
+		movimentacao.setData_transacao("01/08/2200");
+		
+		given()
+			.header("Authorization", "JWT " + token)
+			.body(movimentacao)
+		.when()
+			.post("/transacoes")
+		.then()
+			.statusCode(400)
+			.body("$", hasSize(1))
+			.body("msg[0]", is("Data da Movimentação deve ser menor ou igual à data atual"))
+			.body("msg", hasItem("Data da Movimentação deve ser menor ou igual à data atual"))
+			.body("value", notNullValue())
+		;
+	}
+
+	private Movimentacao getMovimentacaoValida() {
+		Movimentacao movimentacao = new Movimentacao();
+		movimentacao.setConta_id(2237412);
+		movimentacao.setDescricao("Descricao da movimentacao");
+		movimentacao.setEnvolvido("Envolvido da movimentacao");
+		movimentacao.setTipo("REC");
+		movimentacao.setData_transacao("01/08/2024");
+		movimentacao.setData_pagamento("10/08/2024");
+		movimentacao.setValor(100f);
+		movimentacao.setStatus(true);
+		return movimentacao;
 	}
 }
