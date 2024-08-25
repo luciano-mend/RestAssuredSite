@@ -164,4 +164,18 @@ public class SiteTest extends BaseTest{
 			.body("constraint", is("transacoes_conta_id_foreign"))
 		;
 	}
+	
+	@Test
+	public void deveCalcularSaldoContas() {
+		given()
+			.header("Authorization", "JWT " + token)
+		.when()
+			.get("/saldo")
+		.then()
+			.statusCode(200)
+			.body("conta", hasItem("conta alterada"))
+			.body("saldo", hasItem("100.00"))
+			.body("find{it.conta_id == 2237412}.saldo", is("100.00"))
+		;
+	}
 }
