@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.luciano.rest.core.BaseTest;
+import br.luciano.rest.model.Movimentacao;
 
 
 public class SiteTest extends BaseTest{
@@ -78,6 +79,32 @@ public class SiteTest extends BaseTest{
 		.then()
 			.statusCode(400)
 			.body("error", is("Já existe uma conta com esse nome!"))
+		;
+		
+	}
+	
+	@Test
+	public void deveInserirMovimentacaoComSucesso() {
+		Movimentacao movimentacao = new Movimentacao();
+		movimentacao.setConta_id(2237412);
+//		movimentacao.setUsuarioa_id(123);
+		movimentacao.setDescricao("Descricao da movimentacao");
+		movimentacao.setEnvolvido("Envolvido da movimentacao");
+		movimentacao.setTipo("REC");
+		movimentacao.setData_transacao("01/08/2024");
+		movimentacao.setData_pagamento("10/08/2024");
+		movimentacao.setValor(100f);
+		movimentacao.setStatus(true);		
+		
+		given()
+			.header("Authorization", "JWT " + token)
+			.body(movimentacao)
+		.when()
+			.post("/transacoes")
+		.then()
+			.statusCode(201)
+			.body("descricao", is("Descricao da movimentacao"))
+			.body("status", is(true))
 		;
 		
 	}
