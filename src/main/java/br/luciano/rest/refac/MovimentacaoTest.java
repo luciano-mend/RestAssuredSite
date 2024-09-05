@@ -7,39 +7,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import br.luciano.rest.core.BaseTest;
 import br.luciano.rest.model.Movimentacao;
 import br.luciano.rest.utils.DataUtils;
-import io.restassured.RestAssured;
+import br.luciano.rest.utils.SiteUtils;
 
 public class MovimentacaoTest extends BaseTest{
 
-	@BeforeClass
-	public static void login() {
-		Map<String, String> login = new HashMap<>();
-		login.put("email", "luciano@email.com");
-		login.put("senha", "123456");
-		
-		String token = given()
-			.body(login)
-		.when()
-			.post("/signin")
-		.then()
-			.statusCode(200)
-			.extract().path("token")
-		;
-		
-		RestAssured.requestSpecification.header("Authorization", "JWT " + token);
-		
-		RestAssured.get("/reset").then().statusCode(200);
-	}
-	
 	@Test
 	public void deveInserirMovimentacaoComSucesso() {
 		Movimentacao movimentacao = getMovimentacaoValida("Conta para movimentacoes");		
@@ -97,7 +73,7 @@ public class MovimentacaoTest extends BaseTest{
 	@Test
 	public void naoDeveRemoverContaComMovimentacao() {
 		given()
-			.pathParam("contaId", getIdContaPeloNome("Conta com movimentacao"))
+			.pathParam("contaId", SiteUtils.getIdContaPeloNome("Conta com movimentacao"))
 		.when()
 			.delete("/contas/{contaId}")
 		.then()
@@ -109,7 +85,7 @@ public class MovimentacaoTest extends BaseTest{
 	@Test
 	public void deveRemoverMovimentacao() {
 		given()
-			.pathParam("movimentacaoId", getIdMovimentacaoPeloNome("Movimentacao para exclusao"))
+			.pathParam("movimentacaoId", SiteUtils.getIdMovimentacaoPeloNome("Movimentacao para exclusao"))
 		.when()
 			.delete("/transacoes/{movimentacaoId}")
 		.then()
@@ -117,17 +93,9 @@ public class MovimentacaoTest extends BaseTest{
 		;
 	}
 	
-	public Integer getIdContaPeloNome(String nomeConta) {
-		return RestAssured.get("/contas?nome={nomeConta}", nomeConta).then().extract().path("id[0]");
-	}
-	
-	public Integer getIdMovimentacaoPeloNome(String movimentacaoNome) {
-		return RestAssured.get("/transacoes?descricao={movimentacaoNome}", movimentacaoNome).then().extract().path("id[0]");
-	}
-	
 	private Movimentacao getMovimentacaoValida(String nomeConta) {
 		Movimentacao movimentacao = new Movimentacao();
-		movimentacao.setConta_id(getIdContaPeloNome(nomeConta));
+		movimentacao.setConta_id(SiteUtils.getIdContaPeloNome(nomeConta));
 		movimentacao.setDescricao("Descricao da movimentacao");
 		movimentacao.setEnvolvido("Envolvido da movimentacao");
 		movimentacao.setTipo("REC");

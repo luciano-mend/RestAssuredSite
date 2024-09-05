@@ -6,34 +6,13 @@ import static org.hamcrest.Matchers.is;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import br.luciano.rest.core.BaseTest;
-import io.restassured.RestAssured;
+import br.luciano.rest.utils.SiteUtils;
 
 public class ContasTest extends BaseTest{
 
-	@BeforeClass
-	public static void login() {
-		Map<String, String> login = new HashMap<>();
-		login.put("email", "luciano@email.com");
-		login.put("senha", "123456");
-		
-		String token = given()
-			.body(login)
-		.when()
-			.post("/signin")
-		.then()
-			.statusCode(200)
-			.extract().path("token")
-		;
-		
-		RestAssured.requestSpecification.header("Authorization", "JWT " + token);
-		
-		RestAssured.get("/reset").then().statusCode(200);
-	}
-	
 	@Test
 	public void deveIncluriContaComSucesso() {
 		Map<String, String> jsonBody = new HashMap<>();
@@ -57,7 +36,7 @@ public class ContasTest extends BaseTest{
 		given()
 			.body(jsonBody)
 		.when()
-			.put("/contas/{contaId}", getIdContaPeloNome("Conta para alterar"))
+			.put("/contas/{contaId}", SiteUtils.getIdContaPeloNome("Conta para alterar"))
 		.then()
 			.statusCode(200)
 			.body("nome", is("Conta alterada"))
@@ -80,9 +59,4 @@ public class ContasTest extends BaseTest{
 		;
 		
 	}
-	
-	public Integer getIdContaPeloNome(String nomeConta) {
-		return RestAssured.get("/contas?nome={nomeConta}", nomeConta).then().extract().path("id[0]");
-	}
-	
 }
